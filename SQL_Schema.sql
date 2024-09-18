@@ -11,8 +11,8 @@ CREATE TABLE User (
 );
 
 CREATE TABLE PublicUser (
-    UserID INT PRIMARY KEY,
-    FOREIGN KEY (UserID) REFERENCES User(UserID)
+    PublicUserID INT PRIMARY KEY,
+    FOREIGN KEY (PublicUserID) REFERENCES User(UserID)
 );
 
 CREATE TABLE MedicalProfessional (
