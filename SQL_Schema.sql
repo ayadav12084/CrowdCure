@@ -3,11 +3,11 @@ USE CrowdCure;
 
 CREATE TABLE User (
     UserID INT PRIMARY KEY,
-    Name VARCHAR(255),
-    Email VARCHAR(255) UNIQUE,
-    Role ENUM('PublicUser', 'MedicalProfessional', 'HealthAuthority', 'LaboratoryWorker'),
+    Name VARCHAR(255) NOT NULL,
+    Email VARCHAR(255) UNIQUE NOT NULL,
+    Role ENUM('PublicUser', 'MedicalProfessional', 'HealthAuthority', 'LaboratoryWorker') NOT NULL,
     Location VARCHAR(255),
-    DateJoined DATE
+    DateJoined DATE NOT NULL DEFAULT CURRENT_DATE()
 );
 
 CREATE TABLE PublicUser (
