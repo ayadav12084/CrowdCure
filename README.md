@@ -1,0 +1,2 @@
+# CrowdCure
+Epidemic Monitoring System
