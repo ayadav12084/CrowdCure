@@ -7,7 +7,10 @@ CREATE TABLE User (
     Email VARCHAR(255) UNIQUE NOT NULL,
     Role ENUM('PublicUser', 'MedicalProfessional', 'HealthAuthority', 'LaboratoryWorker') NOT NULL,
     Location VARCHAR(255) NOT NULL,  -- Assuming every user has a location
-    DateJoined DATE NOT NULL DEFAULT CURRENT_DATE()
+    DateJoined DATE NOT NULL DEFAULT CURRENT_DATE(),
+    CHECK (CHAR_LENGTH(Name) >= 2),  -- Ensures that a name has at least 2 characters
+    CHECK (Email LIKE '%_@__%.__%')  -- Ensures that email has a valid format
+    
 );
 
 CREATE TABLE PublicUser (
@@ -19,7 +22,8 @@ CREATE TABLE MedicalProfessional (
     MedicalProfessionalID INT PRIMARY KEY,
     HospitalID INT NOT NULL,  -- Assuming every MedicalProfessional must be linked to a Hospital
     FOREIGN KEY (MedicalProfessionalID) REFERENCES User(UserID),
-    FOREIGN KEY (HospitalID) REFERENCES Hospital(HospitalID)
+    FOREIGN KEY (HospitalID) REFERENCES Hospital(HospitalID),
+    CHECK (HospitalID > 0)  -- HospitalID must be a positive integer
 );
 
 CREATE TABLE HealthAuthority (
@@ -39,7 +43,9 @@ CREATE TABLE SymptomReport (
     SeverityLevel INT NOT NULL,  -- Severity level is essential for tracking
     Location VARCHAR(255) NOT NULL,  -- Location is critical for tracking outbreaks
     UserID INT NOT NULL,
-    FOREIGN KEY (UserID) REFERENCES PublicUser(UserID)
+    FOREIGN KEY (UserID) REFERENCES PublicUser(UserID),
+    CHECK (SeverityLevel BETWEEN 1 AND 10),  -- Severity level must be between 1 and 10
+    CHECK (ReportDate <= CURRENT_DATE())  -- Report date cannot be in the future
 );
 
 CREATE TABLE Disease (
@@ -48,7 +54,9 @@ CREATE TABLE Disease (
     Type ENUM('Viral', 'Bacterial', 'Fungal', 'Parasitic') NOT NULL,  -- Type is crucial for classification
     Symptoms TEXT NOT NULL,  -- A disease must have symptoms listed
     IncubationPeriod INT NOT NULL,  -- Incubation period is important for disease tracking
-    TransmissionMethod VARCHAR(255) NOT NULL  -- How the disease spreads is critical
+    TransmissionMethod VARCHAR(255) NOT NULL,  -- How the disease spreads is critical
+    CHECK (IncubationPeriod > 0),  -- Incubation period must be positive
+    CHECK (Type IN ('Viral', 'Bacterial', 'Fungal', 'Parasitic'))  -- Ensures valid disease type
 );
 
 CREATE TABLE DiseaseCase (
@@ -60,7 +68,10 @@ CREATE TABLE DiseaseCase (
     LabTestID INT NOT NULL,
     FOREIGN KEY (DiseaseID) REFERENCES Disease(DiseaseID),
     FOREIGN KEY (MedicalProfessionalID) REFERENCES MedicalProfessional(MedicalProfessionalID),
-    FOREIGN KEY (LabTestID) REFERENCES LabTestReport(LabTestID)
+    FOREIGN KEY (LabTestID) REFERENCES LabTestReport(LabTestID),
+    CHECK (CaseSeverity BETWEEN 1 AND 10),  -- Case severity must be between 1 and 10
+    CHECK (DateDiagnosed <= CURRENT_DATE()),  -- Diagnosis date cannot be in the future
+    CHECK (MedicalProfessionalID > 0)  -- Ensures valid reference to MedicalProfessionalID
 );
 
 CREATE TABLE LabTestReport (
@@ -75,7 +86,9 @@ CREATE TABLE LabTestReport (
     FOREIGN KEY (LaboratoryWorkerID) REFERENCES LaboratoryWorker(LaboratoryWorkerID),
     FOREIGN KEY (UserID) REFERENCES PublicUser(UserID),
     FOREIGN KEY (HospitalID) REFERENCES Hospital(HospitalID),
-    FOREIGN KEY (HealthAuthorityID) REFERENCES HealthAuthority(HealthAuthorityID)
+    FOREIGN KEY (HealthAuthorityID) REFERENCES HealthAuthority(HealthAuthorityID),
+    CHECK (CHAR_LENGTH(Result) > 0),  -- Result cannot be empty
+    CHECK (DateTested <= CURRENT_DATE())  -- Test date cannot be in the future
 );
 
 CREATE TABLE HealthAlert (
@@ -87,7 +100,9 @@ CREATE TABLE HealthAlert (
     HealthAuthorityID INT NOT NULL,
     AlertSeverity INT NOT NULL,  -- The severity of the alert must be recorded
     FOREIGN KEY (DiseaseID) REFERENCES Disease(DiseaseID),
-    FOREIGN KEY (HealthAuthorityID) REFERENCES HealthAuthority(HealthAuthorityID)
+    FOREIGN KEY (HealthAuthorityID) REFERENCES HealthAuthority(HealthAuthorityID),
+    CHECK (AlertSeverity BETWEEN 1 AND 10),  -- Alert severity must be between 1 and 10
+    CHECK (DateIssued <= CURRENT_DATE())  -- Alert date cannot be in the future
 );
 
 CREATE TABLE Hospital (
@@ -98,7 +113,10 @@ CREATE TABLE Hospital (
     PublicHealthRanking INT NOT NULL,  -- Ranking helps in assessing the quality of service
     DeathToll INT NOT NULL,  -- Tracking the number of deaths at the hospital is critical
     Equipments TEXT NOT NULL,  -- Hospitals must have a list of equipment
-    Medicine TEXT NOT NULL  -- Hospitals must have details of available medicines
+    Medicine TEXT NOT NULL,  -- Hospitals must have details of available medicines
+    CHECK (Capacity > 0),  -- Capacity must be positive
+    CHECK (PublicHealthRanking BETWEEN 1 AND 100),  -- Public health ranking must be between 1 and 100
+    CHECK (DeathToll >= 0)  -- Death toll cannot be negative
 );
 
 CREATE TABLE Transmissibility (
@@ -108,7 +126,9 @@ CREATE TABLE Transmissibility (
     SpreadFactor FLOAT NOT NULL,  -- Spread factor must be tracked to assess transmissibility
     TransmissionRate FLOAT NOT NULL,  -- Transmission rate is essential for tracking
     FOREIGN KEY (DiseaseID) REFERENCES Disease(DiseaseID),
-    FOREIGN KEY (HealthAuthorityID) REFERENCES HealthAuthority(HealthAuthorityID)
+    FOREIGN KEY (HealthAuthorityID) REFERENCES HealthAuthority(HealthAuthorityID),
+    CHECK (SpreadFactor > 0),  -- Spread factor must be positive
+    CHECK (TransmissionRate >= 0 AND TransmissionRate <= 1)  -- Transmission rate must be between 0 and 1
 );
 
 CREATE TABLE PandemicSeverityIndex (
@@ -119,7 +139,9 @@ CREATE TABLE PandemicSeverityIndex (
     DiseaseID INT NOT NULL,
     SeverityFactor INT NOT NULL,  -- The severity of the pandemic must be tracked
     FOREIGN KEY (HealthAuthorityID) REFERENCES HealthAuthority(HealthAuthorityID),
-    FOREIGN KEY (DiseaseID) REFERENCES Disease(DiseaseID)
+    FOREIGN KEY (DiseaseID) REFERENCES Disease(DiseaseID),
+    CHECK (SeverityFactor BETWEEN 1 AND 10),  -- Severity factor must be between 1 and 10
+    CHECK (DateIssued <= CURRENT_DATE())  -- Issue date cannot be in the future
 );
 
 
