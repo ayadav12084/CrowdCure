@@ -128,7 +128,7 @@ CREATE TABLE Transmissibility (
     FOREIGN KEY (DiseaseID) REFERENCES Disease(DiseaseID),
     FOREIGN KEY (HealthAuthorityID) REFERENCES HealthAuthority(HealthAuthorityID),
     CHECK (SpreadFactor > 0),  -- Spread factor must be positive
-    CHECK (TransmissionRate >= 0 AND TransmissionRate <= 1)  -- Transmission rate must be between 0 and 1
+    CHECK (TransmissionRate >= 1)  -- Transmission rate must be between >=1
 );
 
 CREATE TABLE PandemicSeverityIndex (
