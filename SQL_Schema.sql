@@ -65,10 +65,8 @@ CREATE TABLE DiseaseCase (
     DateDiagnosed DATE NOT NULL,
     CaseSeverity INT NOT NULL,  -- Severity of the case must be tracked
     MedicalProfessionalID INT NOT NULL,
-    LabTestID INT NOT NULL,
     FOREIGN KEY (DiseaseID) REFERENCES Disease(DiseaseID),
     FOREIGN KEY (MedicalProfessionalID) REFERENCES MedicalProfessional(MedicalProfessionalID),
-    FOREIGN KEY (LabTestID) REFERENCES LabTestReport(LabTestID),
     CHECK (CaseSeverity BETWEEN 1 AND 10),  -- Case severity must be between 1 and 10
     CHECK (DateDiagnosed <= CURRENT_DATE()),  -- Diagnosis date cannot be in the future
     CHECK (MedicalProfessionalID > 0)  -- Ensures valid reference to MedicalProfessionalID
@@ -79,10 +77,12 @@ CREATE TABLE LabTestReport (
     TestType VARCHAR(255) NOT NULL,  -- The type of test must be defined
     DateTested DATE NOT NULL,  -- The date of the test must be provided
     Result VARCHAR(255) NOT NULL,  -- The result of the test must be provided
+    CaseID INT NOT NULL,
     LaboratoryWorkerID INT NOT NULL,
     UserID INT NOT NULL,
     HospitalID INT NOT NULL,
     HealthAuthorityID INT NOT NULL,
+    FOREIGN KEY (CaseID) REFERENCES DiseaseCase(CaseID),
     FOREIGN KEY (LaboratoryWorkerID) REFERENCES LaboratoryWorker(LaboratoryWorkerID),
     FOREIGN KEY (UserID) REFERENCES PublicUser(UserID),
     FOREIGN KEY (HospitalID) REFERENCES Hospital(HospitalID),
