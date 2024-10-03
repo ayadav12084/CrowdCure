@@ -110,3 +110,32 @@ SELECT psi.DateIssued,
        COUNT(ha.HealthAuthorityID) AS NumberOfAlerts  -- Aggregation: COUNT()
 FROM PandemicSeverityIndex psi
 
+Query 9. Group the occurence of the disease by the region
+SELECT d.DiseaseID, HA.Region, 
+    COUNT(D.DiseaseID) AS DiseaseCases ----Aggregation: COUNT()
+FROM Disease d, HealthAlert HA
+WHERE d.DiseaseID = HA.DiseaseID
+
+Query 10. Information about the hospital where the Public Health ranking of the hospitals is maximum.
+Select *
+From Hospital
+Where PublicHealthRanking = Max(PublicHealthRanking) --- Aggregation: Max()
+
+Query 11: Information about the hospital where the Public Health ranking of the hospitals is miniimum.
+Select *
+From Hospital
+Where PublicHealthRanking = Min(PublicHealthRanking) --- Aggregation: Min()
+
+Query 12: The highest disease case severity factor grouped by the disease type.
+Select d.Type, MAX(dc.CaseSeverity)
+From Disease d, DiseaseCase dc
+Group By d.Type --- Aggregation:  MAx
+
+Query 13: The total death toll of all the hoospitals
+Select Count(DeathToll)
+From Hospital ---- Aggregation: Count
+
+Query 14: All records of symptoms and personal information related of all users
+Select *
+From User u, SymptomReport sr
+Join User u ON u.UserID = sr.UserID --- Aggregation: Join
