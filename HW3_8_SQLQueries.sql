@@ -48,22 +48,7 @@ HAVING COUNT(dc.DiseaseCaseID) > (  -- Having clause
     ) AS AvgPatients
 );
 
--- 4. For each laboratory worker, show the number of lab tests they conducted for each disease and the average processing time for those tests.
-
-SELECT lw.LaboratoryWorkerID, d.DiseaseName, 
-       COUNT(ltr.LabTestReportID) AS NumberOfTests,  -- Aggregation: COUNT()
-       AVG(ltr.ProcessingTime) AS AverageProcessingTime  -- Aggregation: AVG()
-FROM LaboratoryWorker lw
-JOIN LabTestReport ltr ON lw.LaboratoryWorkerID = ltr.LaboratoryWorkerID  -- Join 1
-JOIN DiseaseCase dc ON ltr.DiseaseCaseID = dc.DiseaseCaseID  -- Join 2
-JOIN Disease d ON dc.DiseaseID = d.DiseaseID  -- Join 3
-GROUP BY lw.LaboratoryWorkerID, d.DiseaseName  -- Group By
-HAVING AVG(ltr.ProcessingTime) > (  -- Having clause
-    SELECT AVG(ProcessingTime) 
-    FROM LabTestReport
-);
-
--- 5. Which health authority has issued the most health alerts, and what is the average severity factor of the diseases in the regions where those alerts were issued?
+-- 4. Which health authority has issued the most health alerts, and what is the average severity factor of the diseases in the regions where those alerts were issued?
 
 SELECT ha.HealthAuthorityID, r.Region, 
        COUNT(hal.HealthAlertID) AS NumberOfAlerts,  -- Aggregation: COUNT()
@@ -83,7 +68,7 @@ HAVING COUNT(hal.HealthAlertID) = (  -- Having clause
     ) AS MaxAlerts
 );
 
--- 6. Show the average transmissibility rate for each disease over time, including the number of disease cases reported in the region where the transmissibility data was recorded.
+-- 5. Show the average transmissibility rate for each disease over time, including the number of disease cases reported in the region where the transmissibility data was recorded.
 
 SELECT d.DiseaseName, t.ReportDate, 
        AVG(t.TransmissionRate) AS AverageTransmissibility,  -- Aggregation: AVG()
@@ -96,7 +81,7 @@ JOIN DiseaseCase dc ON d.DiseaseID = dc.DiseaseID AND r.RegionID = dc.Region  --
 GROUP BY d.DiseaseName, t.ReportDate  -- Group By
 ORDER BY d.DiseaseName, t.ReportDate;
 
--- 7. How many users are there for each role (PublicUser, MedicalProfessional, etc.), and what is the average number of symptom reports submitted by public users in each location?
+-- 6. How many users are there for each role (PublicUser, MedicalProfessional, etc.), and what is the average number of symptom reports submitted by public users in each location?
 
 SELECT u.Role, COUNT(u.UserID) AS NumberOfUsers,  -- Aggregation: COUNT()
        AVG(CASE WHEN u.Role = 'PublicUser' THEN 1 ELSE 0 END) AS AverageSymptomReports  -- Aggregation: AVG() with conditional logic
@@ -106,7 +91,7 @@ LEFT JOIN SymptomReport sr ON pu.UserID = sr.UserID  -- Join 2 (using LEFT JOIN 
 GROUP BY u.Role  -- Group By
 HAVING AVG(CASE WHEN u.Role = 'PublicUser' THEN 1 ELSE 0 END) > 0;  -- Having clause
 
--- 8. Which symptoms most frequently occur together in symptom reports, and how many disease cases are associated with those symptom pairs?
+-- 7. Which symptoms most frequently occur together in symptom reports, and how many disease cases are associated with those symptom pairs?
 
 SELECT sr1.SymptomType, sr2.SymptomType, 
        COUNT(*) AS Co_occurrence,  -- Aggregation: COUNT()
@@ -118,7 +103,7 @@ JOIN Disease d ON dc.DiseaseID = d.DiseaseID  -- Join 3
 GROUP BY sr1.SymptomType, sr2.SymptomType  -- Group By
 ORDER BY `Co-occurrence` DESC;
 
--- 9. Show how the average severity factor for a specific disease has changed over time in a particular region, also showing the number of health alerts issued for that disease in that region.
+-- 8. Show how the average severity factor for a specific disease has changed over time in a particular region, also showing the number of health alerts issued for that disease in that region.
 
 SELECT psi.DateIssued, 
        AVG(psi.SeverityFactor) AS AverageSeverity,  -- Aggregation: AVG()
